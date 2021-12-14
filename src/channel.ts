@@ -711,6 +711,11 @@ export class Channel<
   }
 
   // How this should work? Last message in current set OR last message in all sets?
+  //
+  // P: I assume that this is used to preview the last message in the channel list.
+  // So it should be the last message from the last set Which means that we should know the set which is last.
+  //
+  // Answer: Or, the last message from the *latest* set.
   /**
    * lastMessage - return the last message, takes into account that last few messages might not be perfectly sorted
    *
@@ -903,6 +908,9 @@ export class Channel<
   }
 
   // How this should work? Current set or every set combined?
+  // P: If we try to calculate this across all sets, we will be wrong, because we don't know the gap sizes.
+  // [[A, B, C], GAP, [D, E, F]]
+  // Answer: use the latest set for this logic.
   /**
    * countUnread - Count of unread messages
    *
@@ -924,6 +932,9 @@ export class Channel<
   }
 
   // How this should work? Current set or every set combined?
+  // P: If we try to calculate this across all sets, we will be wrong, because we don't know the gap sizes.
+  // [[A, B, C], GAP, [D, E, F]]
+  // Answer: use the latest set for this logic.
   /**
    * countUnread - Count the number of unread messages mentioning the current user
    *
@@ -1413,6 +1424,7 @@ export class Channel<
 
     const messages = state.messages || [];
     // reset messageSets too
+    // Answer: correct!
     if (!this.state.messages) {
       this.state.messages = [];
     }

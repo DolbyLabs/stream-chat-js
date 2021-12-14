@@ -57,6 +57,7 @@ export class ChannelState<
     >
   >;
   // will contain threads for all message sets, not just for active
+  // P: Correct!
   threads: Record<
     string,
     Array<
@@ -87,6 +88,7 @@ export class ChannelState<
    */
   isUpToDate: boolean;
 
+  // Correct!
   private messageSets: Array<
     ReturnType<
       ChannelState<
@@ -100,6 +102,8 @@ export class ChannelState<
       >['formatMessage']
     >
   >[] = [];
+  // P: private _latestMessageSet: Above.
+  // or you can use [0] above for that.
   constructor(
     channel: Channel<AttachmentType, ChannelType, CommandType, EventType, MessageType, ReactionType, UserType>,
   ) {
@@ -127,6 +131,7 @@ export class ChannelState<
   }
 
   // We need to know the message set here
+  // Answer: see the logic in the addMessagesSorted below.
   /**
    * addMessageSorted - Add a message to the state
    *
@@ -170,8 +175,9 @@ export class ChannelState<
   // We need to know which set the new message belongs to - this seems tricky
   // When is this called? Message update, delete, new message, loading more messages (upon scroll)
   // Message update or delete - find the correct set by message id, do nothing if mesasge not found in any set
-  // New message - if created_at is older than latast message? - seems not totally reliable
+  // New message - if created_at is older than latest message? - seems not totally reliable
   // Receive some extra param that tells the event?
+  // CORRECT: Receive an extra param which tells the event, so that we can figure out where to put it.
   /**
    * addMessagesSorted - Add the list of messages to state and resorts the messages
    *
@@ -353,6 +359,7 @@ export class ChannelState<
   }
 
   // find message in all message sets
+  // Answer: YES!
   removeQuotedMessageReferences(
     message: MessageResponse<AttachmentType, ChannelType, CommandType, MessageType, ReactionType, UserType>,
   ) {
@@ -604,6 +611,7 @@ export class ChannelState<
   };
 
   // We should do this for every message set
+  // Answer: YES!
   /**
    * Updates the message.user property with updated user object, for messages.
    *
@@ -644,6 +652,7 @@ export class ChannelState<
   };
 
   // We should do this for every message set
+  // Answer: YES!
   /**
    * Marks the messages as deleted, from deleted user.
    *
@@ -725,6 +734,9 @@ export class ChannelState<
   };
 
   // Only for current set?
+  // Answer: NO! for the latest set
+  // Apparently, this is used here:
+  // https://github.com/GetStream/stream-chat-react/blob/645ab6336951c3c096ee3645b5d23d097a9b377c/src/components/Channel/Channel.tsx#L654
   /**
    * filterErrorMessages - Removes error messages from the channel state.
    *
@@ -758,6 +770,7 @@ export class ChannelState<
   }
 
   // Do this for every message set
+  // Answer: yes!
   clearMessages() {
     this.messages = [];
     this.pinnedMessages = [];
@@ -775,5 +788,7 @@ export class ChannelState<
     // Check if loaded context overlaps with an existing message set -> merge the two and switch to the containing message set
     // If no overlap, switch to new message set
     // When to check overlap? loadMessageIntoState, addMessagesSorted and addMesageSorted?
+    //
+    // Answer: addMessagesSorted with the right kind of event should be the place to check for overlapping sets.
   }
 }
