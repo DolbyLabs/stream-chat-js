@@ -710,6 +710,7 @@ export class Channel<
     } as Event<AttachmentType, ChannelType, CommandType, EventType, MessageType, ReactionType, UserType>);
   }
 
+  // How this should work? Last message in current set OR last message in all sets?
   /**
    * lastMessage - return the last message, takes into account that last few messages might not be perfectly sorted
    *
@@ -901,6 +902,7 @@ export class Channel<
     return true;
   }
 
+  // How this should work? Current set or every set combined?
   /**
    * countUnread - Count of unread messages
    *
@@ -921,6 +923,7 @@ export class Channel<
     return count;
   }
 
+  // How this should work? Current set or every set combined?
   /**
    * countUnread - Count the number of unread messages mentioning the current user
    *
@@ -1409,6 +1412,7 @@ export class Channel<
     this.state.membership = state.membership || {};
 
     const messages = state.messages || [];
+    // reset messageSets too
     if (!this.state.messages) {
       this.state.messages = [];
     }

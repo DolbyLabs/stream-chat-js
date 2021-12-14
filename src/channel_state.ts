@@ -56,6 +56,7 @@ export class ChannelState<
       >['formatMessage']
     >
   >;
+  // will contain threads for all message sets, not just for active
   threads: Record<
     string,
     Array<
@@ -85,6 +86,20 @@ export class ChannelState<
    * be pushed on to message list.
    */
   isUpToDate: boolean;
+
+  private messageSets: Array<
+    ReturnType<
+      ChannelState<
+        AttachmentType,
+        ChannelType,
+        CommandType,
+        EventType,
+        MessageType,
+        ReactionType,
+        UserType
+      >['formatMessage']
+    >
+  >[] = [];
   constructor(
     channel: Channel<AttachmentType, ChannelType, CommandType, EventType, MessageType, ReactionType, UserType>,
   ) {
@@ -111,6 +126,7 @@ export class ChannelState<
     this.last_message_at = channel?.state?.last_message_at != null ? new Date(channel.state.last_message_at) : null;
   }
 
+  // We need to know the message set here
   /**
    * addMessageSorted - Add a message to the state
    *
@@ -151,6 +167,11 @@ export class ChannelState<
     };
   }
 
+  // We need to know which set the new message belongs to - this seems tricky
+  // When is this called? Message update, delete, new message, loading more messages (upon scroll)
+  // Message update or delete - find the correct set by message id, do nothing if mesasge not found in any set
+  // New message - if created_at is older than latast message? - seems not totally reliable
+  // Receive some extra param that tells the event?
   /**
    * addMessagesSorted - Add the list of messages to state and resorts the messages
    *
@@ -331,6 +352,7 @@ export class ChannelState<
     return messageWithReaction;
   }
 
+  // find message in all message sets
   removeQuotedMessageReferences(
     message: MessageResponse<AttachmentType, ChannelType, CommandType, MessageType, ReactionType, UserType>,
   ) {
@@ -581,6 +603,7 @@ export class ChannelState<
     return { removed: result.length < msgArray.length, result };
   };
 
+  // We should do this for every message set
   /**
    * Updates the message.user property with updated user object, for messages.
    *
@@ -620,6 +643,7 @@ export class ChannelState<
     _updateUserMessages(this.pinnedMessages, user);
   };
 
+  // We should do this for every message set
   /**
    * Marks the messages as deleted, from deleted user.
    *
@@ -700,6 +724,7 @@ export class ChannelState<
     _deleteUserMessages(this.pinnedMessages, user, hardDelete);
   };
 
+  // Only for current set?
   /**
    * filterErrorMessages - Removes error messages from the channel state.
    *
@@ -732,8 +757,23 @@ export class ChannelState<
     }
   }
 
+  // Do this for every message set
   clearMessages() {
     this.messages = [];
     this.pinnedMessages = [];
+  }
+
+  /**
+   * loadMessageIntoState - Loads a given message (and messages around it) into the state
+   *
+   * @param {string} messageId The id of the message, or 'latest' to indicate switching to the latest messages
+   */
+  loadMessageIntoState(messageId: string | 'latest') {
+    // Check if message is available locally
+    // If available locally, switch to the containing message set - Q: the UX requirement is that the message should be displayed in the middle of the visible area, I assume we can diverge from this in edge cases, for example when the message to be loaded is the first message in the message state
+    // If not available locally, load message and context from backend
+    // Check if loaded context overlaps with an existing message set -> merge the two and switch to the containing message set
+    // If no overlap, switch to new message set
+    // When to check overlap? loadMessageIntoState, addMessagesSorted and addMesageSorted?
   }
 }
