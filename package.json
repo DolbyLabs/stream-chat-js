@@ -120,8 +120,7 @@
     "prepare": "yarn run build",
     "preversion": "yarn && yarn lint && yarn test-unit",
     "version": "git add yarn.lock",
-    "postversion": "git push && git push --tags && npm publish",
-    "install": "yarn run build"
+    "postversion": "git push && git push --tags && npm publish"
   },
   "husky": {
     "hooks": {
